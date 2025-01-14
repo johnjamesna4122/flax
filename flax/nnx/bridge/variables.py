@@ -21,7 +21,6 @@ from flax.core import meta
 from flax.nnx import spmd
 from flax.nnx import traversals
 from flax.nnx import variablelib as variableslib
-from flax.nnx.module import GraphDef
 import typing as tp
 
 
@@ -193,12 +192,7 @@ def linen_vars_to_nnx_attrs(variables: tp.Mapping[str, Any]) -> dict[str, Any]:
 def nnx_attrs_to_linen_vars(nnx_attrs: dict) -> dict:
   """Convert a dict of NNX variables (or variable states) to Linen-style variables."""
   linen_structured = {}
-  for kp, v in traversals.flatten_mapping(
-      nnx_attrs,
-      is_leaf=lambda _, x: isinstance(
-          x, variableslib.Variable | variableslib.VariableState | GraphDef
-      ),
-  ).items():
+  for kp, v in traversals.flatten_mapping(nnx_attrs).items():
     if isinstance(v, variableslib.Variable):
       col_name = variable_type_name(type(v))
       v = to_linen_var(v.to_state())
