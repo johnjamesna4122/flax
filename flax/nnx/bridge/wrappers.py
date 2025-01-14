@@ -22,7 +22,7 @@ from flax.core import FrozenDict
 from flax.core import meta
 from flax.nnx import graph
 from flax.nnx.bridge import variables as bv
-from flax.nnx.module import GraphDef, Module
+from flax.nnx.module import Module
 from flax.nnx.object import Object
 from flax.nnx.rnglib import Rngs
 from flax.nnx.statelib import State
@@ -36,7 +36,7 @@ M = tp.TypeVar('M', bound=Module)
 @dataclasses.dataclass
 class Functional(tp.Generic[M]):
   module_type: tp.Type[M]
-  graphdef: tp.Optional[GraphDef[M]]
+  graphdef: tp.Optional[graph.NodeDef[M]]
   args: tuple[tp.Any, ...]
   kwargs: dict[str, tp.Any]
 
@@ -46,6 +46,7 @@ class Functional(tp.Generic[M]):
       kwargs['rngs'] = rngs
     module = self.module_type(*self.args, **self.kwargs, **kwargs)
     graphdef, state = nnx.split(module)
+    assert type(graphdef) is graph.NodeDef
     self.graphdef = graphdef
     return state
 
